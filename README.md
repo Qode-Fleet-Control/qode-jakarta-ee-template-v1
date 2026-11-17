@@ -4,7 +4,7 @@ Provisioned from [`Qode-Fleet-Control/fleet-template-v1`](https://github.com/Qod
 lifecycle contract (`bin/`, `fleet.conf`, deploy workflows) with a
 Jakarta EE 11 (Open Liberty) starter laid on top.
 
-Jakarta EE 11 on Open Liberty, Java 21, Maven build, packaged as `app.war`. A Jakarta REST resource answers `GET /` with a small JSON document, and MicroProfile Health serves `/health` (with the app's `LivenessCheck`).
+Jakarta EE 11 on Open Liberty, Java 21, Maven build, packaged as `app.war`. A Jakarta REST resource answers `GET /` with a small JSON document, and `GET /health` answers 200 (the app's `HealthResource`). Every request logs one JSON line with status and duration (`RequestLogFilter`).
 
 ## Origin
 
@@ -68,15 +68,16 @@ a plain root path. `/health` answers 200 for the fleet's health check.
 
 - `src/main/java/world/qode/rest/RestApplication.java` — generated, `@ApplicationPath("/")`.
 - `src/main/java/world/qode/rest/RootResource.java` — `GET /`.
-- `src/main/java/world/qode/rest/LivenessCheck.java` — reported at `/health`.
+- `src/main/java/world/qode/rest/HealthResource.java` — `GET /health`.
+- `src/main/java/world/qode/rest/RequestLogFilter.java` — one JSON log line per request (status + durationMs) for the workspace Monitoring tab.
 - `src/main/liberty/config/server.xml` — features, the HTTP endpoint on `${PORT}`, the app at context root `/`.
 
 ## What differs from stock output
 
-- `server.xml` features: `webProfile-11.0` + `mpHealth-4.0` instead of the full `jakartaee-11.0` + `microProfile-7.1` — `features.sh` downloads every listed feature into the image, and the full platform is several times larger. Swap them back if you need the full platform.
+- `server.xml` features: `webProfile-11.0` instead of the full `jakartaee-11.0` + `microProfile-7.1` (no `mpHealth`: Liberty serves its `/health` from a separate web module the app's request-log filter never sees) — `features.sh` downloads every listed feature into the image, and the full platform is several times larger. Swap them back if you need the full platform.
 - `server.xml` HTTP endpoint: `host="*"`, `httpPort="${PORT}"` (a `PORT` variable defaulting to 9080, overridden by the `PORT` environment variable at run time), HTTPS off (`httpsPort="-1"`; the fleet terminates TLS).
 - `server.xml` context root `/` instead of `/app`, and `@ApplicationPath("/")` instead of `/api`: the fleet serves the app at the root of its hostname.
-- Added `RootResource` and `LivenessCheck`.
+- Added `RootResource`, `HealthResource` and `RequestLogFilter`.
 - `Dockerfile`: the starter's, with a Maven build stage in front (the stock one expects `./mvnw package` run on the host first) and `ARG BUILD_ID`. `.dockerignore` replaced for the same reason.
 - `.gitignore`: appended the fleet entries.
 - Added the fleet harness: `bin/`, `fleet.conf`, `compose.yaml`, `.github/workflows/`, `docs/fleet-lifecycle.md`.

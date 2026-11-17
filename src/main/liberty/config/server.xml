@@ -3,12 +3,12 @@
 
     <!-- Enable features -->
     <featureManager>
-        <!-- fleet template: the Web Profile plus MicroProfile Health, not the starter's
-             full jakartaee-11.0 + microProfile-7.1 - features.sh downloads every feature
-             listed here into the image, and the full platform is several times larger.
-             Swap these back for the whole platform. -->
+        <!-- fleet template: the Web Profile, not the starter's full jakartaee-11.0 +
+             microProfile-7.1 - features.sh downloads every feature listed here into the
+             image, and the full platform is several times larger. Swap it back for the
+             whole platform. No mpHealth: /health is the app's own HealthResource, so the
+             app's request log (RequestLogFilter) sees health checks too. -->
         <feature>webProfile-11.0</feature>
-        <feature>mpHealth-4.0</feature>
     </featureManager>
 
     <!-- This template enables security. To get the full use of all the capabilities, a keystore and user registry are required. -->
